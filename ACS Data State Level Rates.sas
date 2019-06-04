@@ -39,3 +39,27 @@ run;
 proc sort data = percents;
 by State Year;
 run;
+
+proc sql;
+create table totals as
+select *,
+sum(&bu.19_25) as total_bu_19 ,
+sum(&bu.26_34) as total_bu_26,
+sum(Total_AA_19_25) as totalaa1,
+sum(Total_AA_26_34) as totalaa2,
+sum(&wu.19_25) as total_wu_19 ,
+sum(&wu.26_34) as total_wu_26,
+sum(Total_white_19_25) as totalw1,
+sum(Total_white_26_34) as totalw2
+from percents
+where VAR21 ne 5
+group by year;
+quit;
+
+data total_per;
+	set totals;
+
+		other_states_aa_uninsured =((total_bu_19+ total_bu_26)/(totalaa1+totalaa2))*100;
+		other_states_white_uninsured =((total_wu_19+ total_wu_26)/(totalw1+totalw2))*100;
+
+	run;
