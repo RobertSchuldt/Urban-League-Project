@@ -63,3 +63,14 @@ data total_per;
 		other_states_white_uninsured =((total_wu_19+ total_wu_26)/(totalw1+totalw2))*100;
 
 	run;
+data ark;
+	set percents;
+	where VAR21 = 5;
+
+			if VAR21 = 5 then arkansas_aa_uninsured = ((&bu.19_25 + &bu.26_34)/(Total_AA_19_25 + Total_AA_26_34))*100;
+		if VAR21 = 5 then arkansas_white_uninsured = (&wu.19_25 + &wu.26_34)/(Total_white_19_25 + Total_white_26_34)*100;
+	run;
+
+data tableau;
+set ark total_per;
+run;
