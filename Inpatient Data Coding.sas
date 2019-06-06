@@ -6,9 +6,9 @@ Email: rschuldt@uams.edu
 
 */
 
-libname ar '****Data';
+libname ar '*******\Data';
 
-proc import datafile = "******ips.xlsx"
+proc import datafile = "*****\Data\arfips.xlsx"
 dbms = xlsx out = counties replace;
 run;
 
@@ -27,10 +27,7 @@ data inpatient;
 	set ar.young_inv;
 	where ADMTDATE ne "00000000";
 		adms_dt = input(ADMTDATE, yymmdd8.);
-
-		
-
-
+		rename DRG = DRG1;
 	run;
 
 proc sort data = inpatient;
@@ -178,6 +175,11 @@ run;
 
    LOS = _LOS;
 
+/* DRG*/
+
+   if DRG1 ne " " then DRG = DRG1;
+   if DRG3 ne " " then DRG =DRG3;
+	
 /* Diagnosis*/
 
    array d (9) ADMTDIAG DIAG1 DIAG2 DIAG3 DIAG4 DIAG5 DIAG6 DIAG7 DIAG8;
@@ -206,6 +208,26 @@ array c (9) count1-count9;
 
 NDX = sum(of count1-count9);
 
+/*Procedure codes */
+
+	array pr (*) PROC1 PROC2 PROC3 PROC4 PROC5 PROC6 PROC7 PROC8 PROC9 PROC10 PROC11 PROC12
+					PROC13 PROC14 PROC15 PROC16 PROC17 PROC18 PROC19 PROC20 PROC21;
+	array pk (*) $ PR1 - PR21;
+		do k = 1 to 21;
+			if pr(k) ne " " then pk(k) = pr(k);
+		end;
+
+	array pc (*) PROC1 PROC2 PROC3 PROC4 PROC5 PROC6 PROC7 PROC8 PROC9 PROC10 PROC11 PROC12
+					PROC13 PROC14 PROC15 PROC16 PROC17 PROC18 PROC19 PROC20 PROC21;
+	array pcc (*) prc1 - prc21;
+		do y = 1 to 21;
+			if pc(y) ne " " then pcc(y) = 1;
+		end;
+
+
+NPR = sum( of prc1-prc21);
+
+
 /* Year of admission*/
 
 YEAR = 	year(adms_dt);
@@ -218,23 +240,23 @@ run;
 
 %icd(ar.icd9, lt)
 %icd(ar.icd10, gt)
-
 /*Now that I have split the dates of ICD 9 and ICD10 codes I can start to run the PQI
 software that I using from AHRQ to generate preventable hospitalizations and must initialize the controls*/
 
 
 /*ICD10*/
-%let filename = icd10;
+%let filename = ar.icd10;
 %let version = icd10;
 
-%include "******************ms\PQI_ALL_CONTROL.sas";
+%include "*****\PQI_SAS_V701_2017_12_QI_SOFTWARE\PQI\Programs\PQI_ALL_CONTROL.sas";
 run;
 /*ICD9*/
 
-%let filename = icd9;
+%let filename = ar.icd9;
 %let version = icd9;
 
-%include "*************************"
+%include "******\PQI\Programs\PQI_ALL_CONTROL.sas";
+run;
 
 /*Now I Must run the measures program. Formats are already saved and prepped*/
 
