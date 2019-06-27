@@ -4,7 +4,7 @@ Code: RObert Schuldt
 Email rschuldt@uams.edu
 */
 
-proc import datafile = "Z:\DATA\Urban League Project\Data\insurancedata.csv"
+proc import datafile = "*************\insurancedata.csv"
 dbms=csv out=insurace replace;
 run;
 
@@ -63,14 +63,43 @@ data total_per;
 		other_states_white_uninsured =((total_wu_19+ total_wu_26)/(totalw1+totalw2))*100;
 
 	run;
-data ark;
-	set percents;
-	where VAR21 = 5;
+proc sort data = total_per;
+by var21;run;
 
-			if VAR21 = 5 then arkansas_aa_uninsured = ((&bu.19_25 + &bu.26_34)/(Total_AA_19_25 + Total_AA_26_34))*100;
-		if VAR21 = 5 then arkansas_white_uninsured = (&wu.19_25 + &wu.26_34)/(Total_white_19_25 + Total_white_26_34)*100;
+proc freq;
+table State;
+run;
+
+data part_two;
+	set total_per;
+
+	total_unin = total_bu_19 + total_bu_26 + total_wu_26 + total_wu_19;
+	total_pop = totalaa1 + totalaa2 + totalw1 + totalw2;
+
+	total_rate = (total_unin/total_pop)*100;
 	run;
 
-data tableau;
-set ark total_per;
+proc sort data = part_two;
+by  year;
+run;
+
+proc export data = part_two
+dbms = CSV outfile = "************\national_uninsured.csv" replace;
+run;
+
+proc import datafile = "**********\arkansas pop.csv"
+dbms=csv out=arkansas replace;
+run;
+
+data total_ark;
+	set arkansas;
+
+	total_pop = Total_White_19_25 + Total_White_26_34 + Total_AA_19_25 + Total_AA_26_34;
+	total_unin = Total_White_UnInsur_19_25 + Total_White_UnInsur_26_34 + Total_AA_UnInsur_19_25 + Total_AA_UnInsur_19_25;
+	total_rate = (total_unin/total_pop)* 100;
+
+run;
+
+proc export data = total_ark
+dbms = CSV outfile = "************\ark_uninsured.csv" replace;
 run;
